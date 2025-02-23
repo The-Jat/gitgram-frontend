@@ -12,6 +12,10 @@ function App() {
   const [language, setLanguage] = useState('');
   const [sort, setSort] = useState('stars');
   const [order, setOrder] = useState('desc');
+  const [license, setLicense] = useState('');
+  const [minStars, setMinStars] = useState('');
+  const [keywords, setKeywords] = useState('');
+  const [topics, setTopics] = useState('');
   const [loading, setLoading] = useState(false);
   const [readme, setReadme] = useState(null);
 
@@ -20,32 +24,50 @@ function App() {
   const [tempLanguage, setTempLanguage] = useState(language);
   const [tempSort, setTempSort] = useState(sort);
   const [tempOrder, setTempOrder] = useState(order);
+  const [tempLicense, setTempLicense] = useState(license);
+  const [tempMinStars, setTempMinStars] = useState(minStars);
+  const [tempKeywords, setTempKeywords] = useState(keywords);
+  const [tempTopics, setTempTopics] = useState(topics);
 
   const observer = useRef();
   const sentinelRef = useRef();
 
-  // Debounced API Call using final search parameters
-  const debouncedLoadRepos = debounce(async (query, page, language, sort, order) => {
-    setLoading(true);
-    try {
-      const res = await axios.get('http://localhost:5000/api/repos', {
-        params: { query, page, per_page: 10, language, sort, order }
-      });
-      setRepos(prev => {
-        const newRepos = res.data.items.filter(repo => !prev.some(r => r.id === repo.id));
-        return [...prev, ...newRepos];
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }, 300);
+  // Debounced API Call using final search parameters (including new filters)
+  const debouncedLoadRepos = debounce(
+    async (query, page, language, sort, order, license, minStars, keywords, topics) => {
+      setLoading(true);
+      try {
+        const res = await axios.get('http://localhost:5000/api/repos', {
+          params: {
+            query,
+            page,
+            per_page: 10,
+            language,
+            sort,
+            order,
+            license,
+            minStars,
+            keywords,
+            topics
+          }
+        });
+        setRepos(prev => {
+          const newRepos = res.data.items.filter(repo => !prev.some(r => r.id === repo.id));
+          return [...prev, ...newRepos];
+        });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    300
+  );
 
   // Load repositories when final filters change
   useEffect(() => {
-    debouncedLoadRepos(query, page, language, sort, order);
-  }, [query, page, language, sort, order]);
+    debouncedLoadRepos(query, page, language, sort, order, license, minStars, keywords, topics);
+  }, [query, page, language, sort, order, license, minStars, keywords, topics]);
 
   // Observer callback for infinite scrolling
   const observerCallback = useCallback(entries => {
@@ -77,11 +99,14 @@ function App() {
 
   // Apply filters when Search button is clicked
   const applyFilters = () => {
-    // Update final search parameters
     setQuery(tempQuery);
     setLanguage(tempLanguage);
     setSort(tempSort);
     setOrder(tempOrder);
+    setLicense(tempLicense);
+    setMinStars(tempMinStars);
+    setKeywords(tempKeywords);
+    setTopics(tempTopics);
     setPage(1);
     setRepos([]); // Clear previous results before loading new ones
   };
@@ -94,7 +119,7 @@ function App() {
       <div className="content">
         {/* Sidebar for Filters */}
         <aside className="sidebar">
-          <div className='sidebar-div'>
+          <div className="sidebar-div">
             <h2>Filters</h2>
             <label>
               Search:
@@ -116,6 +141,46 @@ function App() {
                 <option value="java">Java</option>
                 <option value="cpp">C++</option>
               </select>
+            </label>
+            {/* <label>
+              License:
+              <select
+                value={tempLicense}
+                onChange={e => setTempLicense(e.target.value)}
+              >
+                <option value="">Any</option>
+                <option value="mit">MIT</option>
+                <option value="gpl-3.0">GPL-3.0</option>
+                <option value="apache-2.0">Apache-2.0</option>
+                <option value="isc">ISC</option>
+              </select>
+            </label> */}
+            {/* <label>
+              Minimum Stars:
+              <input
+                type="number"
+                value={tempMinStars}
+                onChange={e => setTempMinStars(e.target.value)}
+                placeholder="e.g., 50"
+              />
+            </label> */}
+            <label>
+              Keywords:
+              <input
+                type="text"
+                value={tempKeywords}
+                onChange={e => setTempKeywords(e.target.value)}
+                placeholder="Comma-separated keywords"
+              />
+            </label>
+            <label>
+              Topics:
+              <input
+                type="text"
+                value={tempTopics}
+                onChange={e => setTempTopics(e.target.value)}
+                placeholder="Comma-separated topics"
+              />
             </label>
             <label>
               Sort by:
