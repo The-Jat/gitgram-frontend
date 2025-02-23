@@ -1,22 +1,120 @@
+/* General App Styles */
 .App {
-  max-width: 600px;
+  max-width: 1200px;
   margin: 0 auto;
-  font-family: sans-serif;
+  font-family: 'Arial', sans-serif;
   padding: 20px;
+  background: #f7f7f7;
 }
+
 header {
   text-align: center;
   margin-bottom: 20px;
 }
-.repo-card {
+
+/* Layout for Content with Sidebar and Main Area */
+.content {
+  display: flex;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 250px;
+  background: #fff;
+  padding: 20px;
   border: 1px solid #ddd;
+  border-radius: 4px;
+  position: sticky;
+  top: 20px;
+  margin-right: 20px;
+}
+
+.sidebar-div {
+  top: 20px;
+  position: sticky;
+}
+
+.sidebar h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.sidebar label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+.sidebar input,
+.sidebar select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.sidebar button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar button:hover {
+  background-color: #0056b3;
+}
+
+/* Main Content (Repository Container) */
+.repo-container {
+  flex: 1;
+}
+
+/* Repository Card Styles */
+.repo-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   padding: 16px;
   margin-bottom: 16px;
-  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 .repo-card h2 {
   margin: 0 0 8px;
+  font-size: 18px;
 }
+
+.repo-card p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #555;
+}
+
+.repo-card button {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.repo-card button:hover {
+  background: #218838;
+}
+
+/* README Modal Styles */
 .readme-modal {
   position: fixed;
   top: 0;
@@ -27,7 +125,9 @@ header {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
+
 .readme-content {
   background: #fff;
   padding: 20px;
