@@ -1,7 +1,7 @@
-import logo from './logo.svg';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { marked } from 'marked';
+import { debounce } from 'lodash';
 import './App.css';
 
 function App() {
@@ -13,38 +13,46 @@ function App() {
   const observer = useRef();
   const sentinelRef = useRef();
 
-  // Load repositories whenever page changes
-  useEffect(() => {
-    const loadRepos = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get('http://localhost:5000/api/repos', {
-          params: { query, page, per_page: 10 }
-        });
-        setRepos(prev => [...prev, ...res.data.items]);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadRepos();
-  }, [page, query]);
+  // Debounced API Call
+  const debouncedLoadRepos = debounce(async (query, page) => {
+    setLoading(true);
+    try {
+      const res = await axios.get('http://localhost:5000/api/repos', {
+        params: { query, page, per_page: 10 }
+      });
+      setRepos(prev => {
+        const newRepos = res.data.items.filter(repo => !prev.some(r => r.id === repo.id));
+        return [...prev, ...newRepos];
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, 300);
 
-  // Setup infinite scrolling using Intersection Observer
+  // Load repositories whenever page/query changes
   useEffect(() => {
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && !loading) {
-        setPage(prev => prev + 1);
-      }
-    });
+    debouncedLoadRepos(query, page);
+  }, [query, page]);
+
+  // Observer callback for infinite scrolling
+  const observerCallback = useCallback(entries => {
+    if (entries[0].isIntersecting && !loading) {
+      setPage(prev => prev + 1);
+    }
+  }, [loading]);
+
+  // Setup Intersection Observer
+  useEffect(() => {
+    observer.current = new IntersectionObserver(observerCallback);
     if (sentinelRef.current) {
       observer.current.observe(sentinelRef.current);
     }
     return () => observer.current.disconnect();
-  }, [loading]);
+  }, [observerCallback]);
 
-  // Fetch README content for a repository
+  // Fetch README content
   const fetchReadme = async (owner, repo) => {
     try {
       const res = await axios.get('http://localhost:5000/api/readme', {
@@ -62,7 +70,7 @@ function App() {
         <h1>GitHub Repos Feed</h1>
       </header>
       <main>
-        {/* {repos.map(repo => (
+        {repos.map(repo => (
           <div key={repo.id} className="repo-card">
             <h2>{repo.full_name}</h2>
             <p>{repo.description}</p>
@@ -70,17 +78,7 @@ function App() {
               View README
             </button>
           </div>
-        ))} */}
-        {repos.map((repo, index) => (
-          <div key={`${repo.id}-${index}`} className="repo-card">
-            <h2>{repo.full_name}</h2>
-            <p>{repo.description}</p>
-            <button onClick={() => fetchReadme(repo.owner.login, repo.name)}>
-              View README
-            </button>
-          </div>
         ))}
-
         {loading && <p>Loading more repositories...</p>}
         <div ref={sentinelRef} style={{ height: '20px' }}></div>
       </main>
@@ -95,11 +93,6 @@ function App() {
       )}
     </div>
   );
-  // return (
-  //   <div className="App">
-  //     <h1>Hello world</h1>
-  //   </div>
-  // );
 }
 
 export default App;
