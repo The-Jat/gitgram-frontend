@@ -1,10 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import { marked } from 'marked';
-import { debounce } from 'lodash';
+import axios from 'axios';  // For making HTTP requests to backend
+import { marked } from 'marked';  // For rendering Markdown (README file) to HTML
+import { debounce } from 'lodash';  // To avoid sending too many requests quickly.
 import './App.css';
 
 function App() {
+  /*
+  * ======= MAIN STATES =======
+  * These store the "final" search parameters that are used to fetch data from the API.
+  */
   // Final search parameters used for API calls
   const [repos, setRepos] = useState([]);
   const [page, setPage] = useState(1);
