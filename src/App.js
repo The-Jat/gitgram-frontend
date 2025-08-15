@@ -23,7 +23,10 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [readme, setReadme] = useState(null);
 
-  // Temporary state for the filter inputs
+  /*
+  * ======= TEMPORARY STATES =======
+  * These store the temporary values of the search parameters as the user modifies them in the UI.
+  */
   const [tempQuery, setTempQuery] = useState(query);
   const [tempLanguage, setTempLanguage] = useState(language);
   const [tempSort, setTempSort] = useState(sort);
@@ -36,6 +39,12 @@ function App() {
   const observer = useRef();
   const sentinelRef = useRef();
 
+  /*
+  * ======= API CALLS TO LOAD REPOSITORIES =======
+  * This function fetches repos from the backend API based on the current search parameters.
+  * It is debounced to prevent excessive calls when parameters change rapidly.
+  * It appends new repos to the existing list, ensuring no duplicates.
+  */
   // Debounced API Call using final search parameters (including new filters)
   const debouncedLoadRepos = debounce(
     async (query, page, language, sort, order, license, minStars, keywords, topics) => {
