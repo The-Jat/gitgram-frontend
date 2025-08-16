@@ -48,13 +48,14 @@ function App() {
   // Debounced API Call using final search parameters (including new filters)
   const debouncedLoadRepos = debounce(
     async (query, page, language, sort, order, license, minStars, keywords, topics) => {
-      setLoading(true);
+      setLoading(true); // Start loading
       try {
+        // Call backend API to fetch repositories
         const res = await axios.get('http://localhost:5000/api/repos', {
           params: {
             query,
             page,
-            per_page: 10,
+            per_page: 10, // Number of repos per page
             language,
             sort,
             order,
@@ -64,6 +65,8 @@ function App() {
             topics
           }
         });
+
+        // Update repo list, avoid duplicates
         setRepos(prev => {
           const newRepos = res.data.items.filter(repo => !prev.some(r => r.id === repo.id));
           return [...prev, ...newRepos];
@@ -71,10 +74,10 @@ function App() {
       } catch (error) {
         console.error(error);
       } finally {
-        setLoading(false);
+        setLoading(false);  // Done loading 
       }
     },
-    300
+    300 // 300ms debounce interval
   );
 
   // Load repositories when final filters change
