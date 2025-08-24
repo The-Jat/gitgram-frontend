@@ -80,6 +80,11 @@ function App() {
     300 // 300ms debounce interval
   );
 
+  /*
+  * ======= FETCH DATA WHEN FILTERS CHANGE =======
+  * Whenever any of the final search parameters change, we call the debounced function to load repos.
+  * This ensures that we fetch new data based on the latest filters.
+  */
   // Load repositories when final filters change
   useEffect(() => {
     debouncedLoadRepos(query, page, language, sort, order, license, minStars, keywords, topics);
@@ -92,7 +97,12 @@ function App() {
     }
   }, [loading]);
 
-  // Setup Intersection Observer
+  /*
+  * ======= INFINITE SCROLLING SETUP =======
+  * We use the Intersection Observer API to implement infinite scrolling.
+  * When the sentinel element comes into view, we increment the page number to load more repos
+  * if we are not already loading data.
+  */
   useEffect(() => {
     observer.current = new IntersectionObserver(observerCallback);
     if (sentinelRef.current) {
@@ -101,7 +111,9 @@ function App() {
     return () => observer.current.disconnect();
   }, [observerCallback]);
 
-  // Fetch README content
+  /*
+  * ======= FETCH AND RENDER README =======
+  */
   const fetchReadme = async (owner, repo) => {
     try {
       const res = await axios.get('http://localhost:5000/api/readme', {
@@ -113,7 +125,13 @@ function App() {
     }
   };
 
-  // Apply filters when Search button is clicked
+  /*
+  * ======= APPLY FILTERS =======
+  * This function is called when the user clicks the "Search" button.
+  * It updates the final search parameters with the temporary values
+  * and resets the page number and repo list to start fresh.
+  * This ensures that the new filters are applied correctly.
+  */
   const applyFilters = () => {
     setQuery(tempQuery);
     setLanguage(tempLanguage);
